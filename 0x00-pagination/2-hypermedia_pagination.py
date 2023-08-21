@@ -38,24 +38,20 @@ class Server:
     pagination: List = self.dataset()
     return (pagination[range[0]:range[1]])
   
-  def get_hyper(self, page: int = 1, page_size: int = 10) -> Dict:
-    data = []
-    try:
-      data = self.get_page(page, page_size)
-    except AssertionError:
+  def get_hyper(self, page: int = 1, page_size: int = 10) -> dict:
+    if not isinstance(page, int) or not isinstance(page_size, int) or page <= 0 or page_size <= 0:
       return {}
-    dataset: List = self.dataset()
-    totalpages: int  = len(dataset) if dataset else 0
-    totalpages = math.ceil(totalpages / page_size)
-    lastviewedpage: int = (page + 1) if (page - 1) >= 1 else None
-    nextviewedpage: int = (page + 1) if (page + 1) <= totalpages else None
+
+    total_pages = math.ceil(len(self.dataset()) / page_size)
+    data_page = self.get_page(page, page_size)
     
-    pagination: Dict = {
-      'page_size': page_size,
-      'page': page,
-      'data': data,
-      'next_page': nextviewedpage,
-      'prev_page': lastviewedpage,
-      'total_pages': totalpages
+    hyper_dict = {
+      "page_size": len(data_page),
+      "page": page,
+      "data": data_page,
+      "next_page": page + 1 if page < total_pages else None,
+      "prev_page": page - 1 if page > 1 else None,
+      "total_pages": total_pages
     }
-    return pagination
+    
+    return hyper_dict
